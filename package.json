@@ -1,0 +1,41 @@
+{
+  "name": "impuddle",
+  "version": "0.0.0",
+  "description": "Universal code manager. Fetch code instead of installing packages",
+  "main": "lib/index.js",
+  "bin": {
+    "imp": "lib/index.js",
+    "impuddle": "lib/index.js"
+  },
+  "scripts": {
+    "test": "test",
+    "cli": "node lib/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aexol-studio/impuddle.git"
+  },
+  "keywords": [
+    "code"
+  ],
+  "author": "Aexol",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aexol-studio/impuddle/issues"
+  },
+  "homepage": "https://github.com/aexol-studio/impuddle#readme",
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.12",
+    "@types/node": "^16.9.3",
+    "@typescript-eslint/eslint-plugin": "^4.31.1",
+    "@typescript-eslint/parser": "^4.31.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "fs-extra": "^10.0.0",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "isomorphic-git": "^1.10.0"
+  }
+}

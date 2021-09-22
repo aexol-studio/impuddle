@@ -1,0 +1,13 @@
+.vscode
+.DS_STORE
+node_modules
+.module-cache
+*.log*
+build
+dist
+docs-dist
+lib
+.idea
+.tscache
+package-lock.json
+*.tsbuildinfo*
