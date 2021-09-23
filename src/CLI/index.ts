@@ -9,6 +9,7 @@ Universal code manager for fetching whole repos, certain folders or certain file
 
 Usage:
     imp --add <url> <remote folders> <local folders>
+    imp --invert <url>
     imp --help
     imp --version
 `
