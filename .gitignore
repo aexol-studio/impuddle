@@ -11,3 +11,4 @@ lib
 .tscache
 package-lock.json
 *.tsbuildinfo*
+impuddle.json
