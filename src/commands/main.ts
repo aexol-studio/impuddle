@@ -5,6 +5,7 @@ import fsExtra from "fs-extra";
 import http from "isomorphic-git/http/node";
 import { readConfig, updateConfig } from "../config";
 import ora from "ora";
+import { exec } from "child_process";
 
 const IMPUDDLE_DIR = path.join(process.cwd(), ".impuddle");
 
@@ -20,31 +21,32 @@ export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
     throw new Error("Remote repository subpath and destination not included");
   }
   const spinner = ora("Cloning from repository").start();
-  const dir = path.join(process.cwd(), dest);
-  await clone({
-    dir: IMPUDDLE_DIR,
-    fs,
-    http,
-    url,
-    ref: branch,
-  });
-  spinner.text = "Update config";
-  fsExtra.copySync(path.join(IMPUDDLE_DIR, subPath), dir);
-  fsExtra.removeSync(IMPUDDLE_DIR);
-  updateConfig((cfg) => {
-    if (!cfg.repos[url]) cfg.repos[url] = {};
-    if (!cfg.repos[url][branch]) cfg.repos[url][branch] = {};
-    if (!cfg.repos[url][branch][subPath]) cfg.repos[url][branch][subPath] = [];
-    if (!cfg.repos[url][branch][subPath].includes(dest)) {
-      cfg.repos[url][branch][subPath] = [
-        ...cfg.repos[url][branch][subPath],
-        dest,
-      ];
+  exec(`git clone ${url} ${IMPUDDLE_DIR}`, (error) => {
+    if (error) {
+      console.error(`error: ${error.message}`);
+      return;
     }
-    return {
-      ...cfg,
-    };
+    const dir = path.join(process.cwd(), dest);
+    spinner.text = "Update config";
+    fsExtra.copySync(path.join(IMPUDDLE_DIR, subPath), dir);
+    fsExtra.removeSync(IMPUDDLE_DIR);
+    updateConfig((cfg) => {
+      if (!cfg.repos[url]) cfg.repos[url] = {};
+      if (!cfg.repos[url][branch]) cfg.repos[url][branch] = {};
+      if (!cfg.repos[url][branch][subPath])
+        cfg.repos[url][branch][subPath] = [];
+      if (!cfg.repos[url][branch][subPath].includes(dest)) {
+        cfg.repos[url][branch][subPath] = [
+          ...cfg.repos[url][branch][subPath],
+          dest,
+        ];
+      }
+      return {
+        ...cfg,
+      };
+    });
   });
+
   spinner.stop();
   // cp -r .impuddle subPath
 };
