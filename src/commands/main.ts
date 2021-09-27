@@ -13,7 +13,7 @@ interface Props {
   branch?: string;
 }
 
-export const add = async ({ url, subPath, dest, branch = "main" }: Props) => {
+export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
   if (!subPath || !dest) {
     throw new Error("Remote repository subpath and destination not included");
   }
