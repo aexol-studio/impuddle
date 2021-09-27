@@ -1,8 +1,8 @@
-import { clone, commit, add as addGit, push } from "isomorphic-git";
+// import { clone, commit, add as addGit, push } from "isomorphic-git";
 import path from "path";
-import fs from "fs";
+// import fs from "fs";
 import fsExtra from "fs-extra";
-import http from "isomorphic-git/http/node";
+// import http from "isomorphic-git/http/node";
 import { readConfig, updateConfig } from "../config";
 import ora from "ora";
 import { exec } from "child_process";
@@ -16,7 +16,7 @@ interface Props {
   branch?: string;
 }
 
-export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
+export const add = async ({ url, subPath, dest, branch = "main" }: Props) => {
   if (!subPath || !dest) {
     throw new Error("Remote repository subpath and destination not included");
   }
@@ -33,13 +33,8 @@ export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
     updateConfig((cfg) => {
       if (!cfg.repos[url]) cfg.repos[url] = {};
       if (!cfg.repos[url][branch]) cfg.repos[url][branch] = {};
-      if (!cfg.repos[url][branch][subPath])
-        cfg.repos[url][branch][subPath] = [];
-      if (!cfg.repos[url][branch][subPath].includes(dest)) {
-        cfg.repos[url][branch][subPath] = [
-          ...cfg.repos[url][branch][subPath],
-          dest,
-        ];
+      if (cfg.repos[url][branch][subPath] !== dest) {
+        cfg.repos[url][branch][subPath] = dest;
       }
       return {
         ...cfg,
@@ -51,31 +46,41 @@ export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
   // cp -r .impuddle subPath
 };
 
-export const invert = async ({ url, branch = "master" }: Props) => {
+export const invert = async ({ url }: Props) => {
   // command to push back to the repository
   const config = readConfig();
-  const spinner = ora("Reading config").start();
+  // const spinner = ora("Reading config").start();
   if (!config.repos[url]) {
-    spinner.stop();
+    // spinner.stop();
     throw new Error("Invalid invert. Repository does not exist in config");
   }
-  spinner.text = "Pushing files to repository";
-  await clone({
-    dir: IMPUDDLE_DIR,
-    fs,
-    http,
-    url,
-    ref: branch,
+  // spinner.text = "Pushing files";
+  Object.keys(config.repos[url]).forEach((branch) => {
+    exec(`git clone ${url} ${IMPUDDLE_DIR} --branch ${branch}`, (error) => {
+      if (error) {
+        console.error(`error: ${error.message}`);
+        return;
+      }
+      Object.entries(config.repos[url][branch]).forEach(async (remotePath) => {
+        const dir = path.join(process.cwd(), remotePath[1]);
+        const dir2 = path.join(IMPUDDLE_DIR, remotePath[0]);
+        await fsExtra.copy(dir, dir2);
+      });
+      exec(
+        `cd ${IMPUDDLE_DIR} && ls -lh && git add . && git commit -m "Inverted commit from impuddle" && git push origin ${branch}`,
+        (error, stderr) => {
+          if (stderr) {
+            console.log("Dawdaw", stderr);
+          }
+          fsExtra.removeSync(IMPUDDLE_DIR);
+          if (error) {
+            console.error(`error: ${error.message}`);
+            return;
+          }
+        }
+      );
+    });
   });
-  await addGit({ fs, dir: IMPUDDLE_DIR, filepath: "." });
-  await commit({
-    fs,
-    message: "Inverted commit from impuddle",
-    dir: IMPUDDLE_DIR,
-  });
-  await push({ fs, http, ref: branch, dir: IMPUDDLE_DIR });
-  fsExtra.removeSync(IMPUDDLE_DIR);
-  spinner.stop();
 };
 
 export const sync = () => {
