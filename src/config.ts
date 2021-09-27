@@ -5,7 +5,7 @@ export interface Config {
   repos: {
     [url: string]: {
       [branch: string]: {
-        [subPath: string]: string[];
+        [subPath: string]: string;
       };
     };
   };
