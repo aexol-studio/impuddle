@@ -39,7 +39,6 @@
   },
   "dependencies": {
     "@octokit/auth-token": "^2.5.0",
-    "isomorphic-git": "^1.10.0",
     "ora": "^5.4.0",
     "yargs": "^16.1.1"
   }
