@@ -27,9 +27,20 @@ welcome().then(() => {
           });
       },
       async (argv) => {
-        add(argv as unknown as Pick<AddConf, "dest" | "subPath" | "url">);
+        add(
+          argv as unknown as Pick<
+            AddConf,
+            "dest" | "subPath" | "url" | "branch"
+          >
+        );
       }
     )
+    .option("branch", {
+      alias: "b",
+      describe: "Branch from which the files are downloaded",
+      string: true,
+      default: "master",
+    })
     .command(
       "invert <url>",
       "Push back files to selected repository",

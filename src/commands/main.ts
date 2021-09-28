@@ -18,7 +18,7 @@ export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
     throw new Error("Remote repository subpath and destination not included");
   }
   const spinner = ora("Adding files from repository\n").start();
-  execSync(`git clone ${url} ${IMPUDDLE_DIR}`, {
+  execSync(`git clone -b ${branch} ${url} ${IMPUDDLE_DIR}`, {
     encoding: "utf-8",
   });
   const dir = path.join(process.cwd(), dest);
