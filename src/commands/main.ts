@@ -66,6 +66,7 @@ export const invert = async ({ url }: Props) => {
 
 export const sync = () => {
   // fetch all entries from git from config
+  const spinner = ora("Synchronizing files\n").start();
   const config = readConfig();
   const localBranches = execSync("git branch", {
     encoding: "utf-8",
@@ -74,7 +75,6 @@ export const sync = () => {
     .map((branch) => branch.trim().replace("* ", ""));
   Object.entries(config.repos).forEach(async ([url, value]) => {
     Object.entries(value).forEach(async ([branch, value]) => {
-      console.log(branch, value);
       if (localBranches.includes(branch)) {
         execSync(`git checkout ${branch}`, {
           encoding: "utf-8",
@@ -95,4 +95,5 @@ export const sync = () => {
       fsExtra.removeSync(IMPUDDLE_DIR);
     });
   });
+  spinner.stop();
 };
