@@ -51,9 +51,9 @@ export const invert = async ({ url }: Props) => {
       encoding: "utf-8",
     });
     Object.entries(config.repos[url][branch]).forEach(async (remotePath) => {
-      const dir = path.join(process.cwd(), remotePath[1]);
-      const dir2 = path.join(IMPUDDLE_DIR, remotePath[0]);
-      fsExtra.copySync(dir, dir2);
+      const sourcePath = path.join(process.cwd(), remotePath[1]);
+      const destinationPath = path.join(IMPUDDLE_DIR, remotePath[0]);
+      fsExtra.copySync(sourcePath, destinationPath);
       execSync(
         `cd ${IMPUDDLE_DIR} && git add . && git commit -m "Inverted commit from impuddle" && git push origin ${branch}`,
         { encoding: "utf-8" }
@@ -67,7 +67,32 @@ export const invert = async ({ url }: Props) => {
 export const sync = () => {
   // fetch all entries from git from config
   const config = readConfig();
+  const localBranches = execSync("git branch", {
+    encoding: "utf-8",
+  })
+    .split("\n")
+    .map((branch) => branch.trim().replace("* ", ""));
   Object.entries(config.repos).forEach(async ([url, value]) => {
-    Object.entries(value).forEach(async ([branch, value]) => {});
+    Object.entries(value).forEach(async ([branch, value]) => {
+      console.log(branch, value);
+      if (localBranches.includes(branch)) {
+        execSync(`git checkout ${branch}`, {
+          encoding: "utf-8",
+        });
+      } else {
+        execSync(`git checkout -b ${branch}`, {
+          encoding: "utf-8",
+        });
+      }
+      execSync(`git clone ${url} ${IMPUDDLE_DIR} --branch ${branch}`, {
+        encoding: "utf-8",
+      });
+      Object.entries(value).forEach(async (remotePath) => {
+        const destinationPath = path.join(process.cwd(), remotePath[1]);
+        const sourcePath = path.join(IMPUDDLE_DIR, remotePath[0]);
+        fsExtra.copySync(sourcePath, destinationPath);
+      });
+      fsExtra.removeSync(IMPUDDLE_DIR);
+    });
   });
 };

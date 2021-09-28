@@ -1,7 +1,7 @@
 import { welcome } from "./welcome";
 import * as yargs from "yargs";
 import { AddConf, InvertConf } from "Configuration";
-import { add, invert } from "./commands/main";
+import { add, invert, sync } from "./commands/main";
 
 welcome().then(() => {
   return yargs
@@ -54,6 +54,9 @@ welcome().then(() => {
         invert(argv as unknown as Pick<InvertConf, "url">);
       }
     )
+    .command("sync", "Fetch all entries from git from config", async () => {
+      sync();
+    })
     .showHelpOnFail(true)
     .demandCommand()
     .epilog("Bye!").argv;
