@@ -68,22 +68,8 @@ export const sync = () => {
   // fetch all entries from git from config
   const spinner = ora("Synchronizing files\n").start();
   const config = readConfig();
-  const localBranches = execSync("git branch", {
-    encoding: "utf-8",
-  })
-    .split("\n")
-    .map((branch) => branch.trim().replace("* ", ""));
   Object.entries(config.repos).forEach(async ([url, value]) => {
     Object.entries(value).forEach(async ([branch, value]) => {
-      if (localBranches.includes(branch)) {
-        execSync(`git checkout ${branch}`, {
-          encoding: "utf-8",
-        });
-      } else {
-        execSync(`git checkout -b ${branch}`, {
-          encoding: "utf-8",
-        });
-      }
       execSync(`git clone ${url} ${IMPUDDLE_DIR} --branch ${branch}`, {
         encoding: "utf-8",
       });
