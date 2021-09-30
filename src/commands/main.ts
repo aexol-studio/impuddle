@@ -18,7 +18,7 @@ export const add = async ({ url, subPath, dest, branch = "master" }: Props) => {
     throw new Error("Remote repository subpath and destination not included");
   }
   const spinner = ora("Adding files from repository\n").start();
-  execSync(`git clone ${url} ${IMPUDDLE_DIR}`, {
+  execSync(`git clone -b ${branch} ${url} ${IMPUDDLE_DIR}`, {
     encoding: "utf-8",
   });
   const dir = path.join(process.cwd(), dest);
@@ -51,9 +51,9 @@ export const invert = async ({ url }: Props) => {
       encoding: "utf-8",
     });
     Object.entries(config.repos[url][branch]).forEach(async (remotePath) => {
-      const dir = path.join(process.cwd(), remotePath[1]);
-      const dir2 = path.join(IMPUDDLE_DIR, remotePath[0]);
-      fsExtra.copySync(dir, dir2);
+      const sourcePath = path.join(process.cwd(), remotePath[1]);
+      const destinationPath = path.join(IMPUDDLE_DIR, remotePath[0]);
+      fsExtra.copySync(sourcePath, destinationPath);
       execSync(
         `cd ${IMPUDDLE_DIR} && git add . && git commit -m "Inverted commit from impuddle" && git push origin ${branch}`,
         { encoding: "utf-8" }
@@ -66,8 +66,20 @@ export const invert = async ({ url }: Props) => {
 
 export const sync = () => {
   // fetch all entries from git from config
+  const spinner = ora("Synchronizing files\n").start();
   const config = readConfig();
   Object.entries(config.repos).forEach(async ([url, value]) => {
-    Object.entries(value).forEach(async ([branch, value]) => {});
+    Object.entries(value).forEach(async ([branch, value]) => {
+      execSync(`git clone ${url} ${IMPUDDLE_DIR} --branch ${branch}`, {
+        encoding: "utf-8",
+      });
+      Object.entries(value).forEach(async (remotePath) => {
+        const destinationPath = path.join(process.cwd(), remotePath[1]);
+        const sourcePath = path.join(IMPUDDLE_DIR, remotePath[0]);
+        fsExtra.copySync(sourcePath, destinationPath);
+      });
+      fsExtra.removeSync(IMPUDDLE_DIR);
+    });
   });
+  spinner.stop();
 };
