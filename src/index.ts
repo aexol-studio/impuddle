@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { welcome } from "./welcome";
 import * as yargs from "yargs";
 import { AddConf, InvertConf } from "Configuration";
