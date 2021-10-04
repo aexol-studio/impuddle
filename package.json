@@ -1,6 +1,6 @@
 {
   "name": "impuddle",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Universal code manager. Fetch code instead of installing packages",
   "main": "lib/index.js",
   "bin": {
